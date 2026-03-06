@@ -19,12 +19,9 @@ const snapshot = async () => {
 
   const scanDir = async (currentPath) => {
     const items = await readdir(currentPath, { withFileTypes: true });
-
-    // нужно переписать с использованием Promise.all, чтобы не делать последовательные вызовы
-    for (const item of items) {
+    const itemPromises = items.map(async item => {
       const fullPath = join(currentPath, item.name);
       const normalizedPath = relative(rootPath, fullPath).replace(/\\/g, '/');
-
       if (item.isDirectory()) {
         entries.push({
           path: normalizedPath,
@@ -41,7 +38,9 @@ const snapshot = async () => {
           content
         });
       }
-    }
+    });
+
+    await Promise.all(itemPromises);
   };
 
   await scanDir(rootPath);
