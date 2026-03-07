@@ -1,4 +1,6 @@
-import { readdir, readFile, writeFile, stat } from 'node:fs/promises';
+import { readdir, stat } from 'node:fs/promises';
+import { createReadStream, createWriteStream } from 'node:fs';
+import { pipeline } from 'node:stream/promises';
 import { join } from 'node:path';
 
 const merge = async () => {
@@ -41,13 +43,25 @@ const merge = async () => {
       }
     }
 
-    const promises = targetFiles.map(file => readFile(join(partsDir, file), 'utf8'));
+    async function* mergeGenerator() {
+      for (let i = 0; i < targetFiles.length; i++) {
+        const filePath = join(partsDir, targetFiles[i]);
+        const readStream = createReadStream(filePath, { encoding: 'utf8' });
 
-    const files = await Promise.all(promises);
+        for await (const chunk of readStream) {
+          yield chunk;
+        }
 
-    let mergedContent = files.join('\n');
+        if (i < targetFiles.length - 1) {
+          yield '\n';
+        }
+      }
+    }
 
-    await writeFile(mergedFile, mergedContent, 'utf8');
+    await pipeline(
+      mergeGenerator(),
+      createWriteStream(mergedFile, { encoding: 'utf8' })
+    );
 
   } catch (error) {
     throw new Error('FS operation failed');
