@@ -6,7 +6,6 @@ const snapshotJsonPath = join(dirname(rootPath), 'snapshot.json').replace(/\\/g,
 
 const snapshot = async () => {
   try {
-    // нужно обернуть всю функцию в try catch
     const stats = await stat(rootPath);
     if (!stats.isDirectory()) {
       throw new Error('Not a directory');
