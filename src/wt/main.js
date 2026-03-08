@@ -1,8 +1,8 @@
-import { Worker } from 'worker_threads';
-import { cpus } from 'os';
-import { readFile } from 'fs/promises';
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
+import { Worker } from 'node:worker_threads';
+import { cpus } from 'node:os';
+import { readFile } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
