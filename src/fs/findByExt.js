@@ -1,19 +1,18 @@
 import { resolve, relative } from 'node:path';
 import { readdir, stat } from 'node:fs/promises';
+import { parseArgs } from 'node:util';
 
 const findByExt = async () => {
-  const args = process.argv.slice(2);
-  let ext = '';
+  const { values } = parseArgs({
+    options: {
+      ext: {
+        type: 'string',
+        default: 'txt',
+      },
+    },
+  });
 
-  for (let i = 0; i < args.length; i++) {
-    if (args[i] === '--ext') {
-      ext = args[i + 1];
-    }
-  }
-
-  if (!ext) {
-    ext = 'txt';
-  }
+  let ext = values.ext;
 
   if (!ext.startsWith('.')) {
     ext = "." + ext;
