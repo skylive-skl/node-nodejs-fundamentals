@@ -4,6 +4,7 @@ import { EOL } from 'node:os';
 import { createReadStream, createWriteStream } from 'node:fs';
 import { access, constants } from 'node:fs/promises';
 import { parseArgs } from 'node:util';
+import { once } from 'node:events';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -38,6 +39,9 @@ const split = async () => {
   const getWriteStream = () => {
     if (!writeStream) {
       writeStream = createWriteStream(join(__dirname, `chunk_${currentChunk}.txt`));
+      writeStream.once('error', (err) => {
+        console.error('Write stream error:', err.message);
+      });
     }
     return writeStream;
   };
@@ -55,12 +59,13 @@ const split = async () => {
 
         const canWrite = stream.write(parts[i] + EOL);
         if (!canWrite) {
-          await new Promise((resolve) => stream.once('drain', resolve));
+          await once(stream, 'drain');
         }
 
         currentLineCount++;
         if (currentLineCount >= maxLines) {
           stream.end();
+          await once(stream, 'finish');
           writeStream = null;
           currentChunk++;
           currentLineCount = 0;
@@ -70,8 +75,7 @@ const split = async () => {
 
     if (remainder) {
       const stream = getWriteStream();
-      stream.write(remainder + EOL);
-      stream.end();
+      stream.end(remainder + EOL);
     } else if (writeStream) {
       writeStream.end();
     }
