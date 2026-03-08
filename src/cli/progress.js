@@ -1,13 +1,20 @@
-const progress = () => {
-  const getArg = (name, def) => {
-    const index = process.argv.indexOf(name);
-    return index !== -1 ? process.argv[index + 1] : def;
-  };
+import { parseArgs } from 'node:util';
 
-  const duration = Number(getArg('--duration', 5000));
-  const interval = Number(getArg('--interval', 100));
-  const length = Number(getArg('--length', 30));
-  const color = getArg('--color', '');
+const progress = () => {
+  const { values } = parseArgs({
+    options: {
+      duration: { type: 'string', default: '5000' },
+      interval: { type: 'string', default: '100' },
+      length: { type: 'string', default: '30' },
+      color: { type: 'string', default: '' },
+    },
+    strict: false,
+  });
+
+  const duration = Number(values.duration);
+  const interval = Number(values.interval);
+  const length = Number(values.length);
+  const color = values.color;
 
   let colorStart = '';
   let colorEnd = '';
