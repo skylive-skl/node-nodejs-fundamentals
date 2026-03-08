@@ -1,7 +1,7 @@
-import readline from 'node:readline';
+import { createInterface } from 'node:readline';
 
 const interactive = () => {
-  const rl = readline.createInterface({
+  const rl = createInterface({
     input: process.stdin,
     output: process.stdout,
     prompt: '> '
