@@ -2,21 +2,32 @@ import { readdir, stat } from 'node:fs/promises';
 import { createReadStream, createWriteStream } from 'node:fs';
 import { pipeline } from 'node:stream/promises';
 import { join } from 'node:path';
+import { parseArgs } from 'node:util';
 
 const merge = async () => {
   const partsDir = join(import.meta.dirname, '..', 'workspace', 'parts');
   const mergedFile = join(import.meta.dirname, '..', 'workspace', 'merged.txt');
 
 
-  const args = process.argv.slice(2);
+  const { values, positionals } = parseArgs({
+    options: {
+      files: {
+        type: 'string',
+        multiple: true,
+      },
+    },
+    allowPositionals: true,
+  });
+
   let filesToMerge = null;
 
-  const filesIndex = args.indexOf('--files');
-  if (filesIndex !== -1) {
-    filesToMerge = [];
-    for (let i = filesIndex + 1; i < args.length; i++) {
-      if (args[i].startsWith('--')) break;
-      filesToMerge.push(args[i]);
+  if (values.files) {
+    filesToMerge = values.files
+      .flatMap((f) => f.split(',').map((s) => s.trim()))
+      .filter(Boolean);
+
+    if (positionals.length > 0) {
+      filesToMerge.push(...positionals);
     }
 
     if (filesToMerge.length === 0) {
