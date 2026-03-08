@@ -1,16 +1,21 @@
 import { Transform } from 'node:stream';
 import { EOL } from 'node:os';
+import { parseArgs } from 'node:util';
 
 const filter = () => {
-  const args = process.argv.slice(2);
-  const patternIndex = args.indexOf('--pattern');
+  let pattern;
 
-  if (patternIndex === -1 || patternIndex === args.length - 1) {
+  try {
+    const { values } = parseArgs({
+      options: { pattern: { type: 'string' } },
+    });
+    pattern = values.pattern;
+    if (!pattern) throw new Error('Missing pattern');
+  } catch (error) {
     console.error('Error: --pattern argument is required');
     process.exit(1);
   }
 
-  const pattern = args[patternIndex + 1];
   let remainder = '';
 
   process.stdin.setEncoding('utf8');
