@@ -1,5 +1,5 @@
-import { Transform } from 'stream';
-import { EOL } from 'os';
+import { Transform } from 'node:stream';
+import { EOL } from 'node:os';
 
 const filter = () => {
   const args = process.argv.slice(2);
